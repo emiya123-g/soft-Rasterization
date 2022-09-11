@@ -18,9 +18,15 @@ glm::vec4 Shader::FS(const V2f& v)
 	glm::vec3 color = glm::vec3(0.0);
 	glm::vec3 worldPos = glm::vec3(v.posW.x, v.posW.y, v.posW.z);
 	glm::vec3 viewDir = glm::normalize(cam->Position - worldPos);
-	color += dirLight->BlinPhong(v.normal, viewDir, glm::vec3(255));
 
-	return glm::vec4(color, 255);   //if the value not in 0-255 this will overflow and make some mistake
+	glm::vec3 albedo = material != nullptr ? material->albedo : glm::vec3(1.0);
+
+	color += dirLight->BlinPhong(v.normal, viewDir, albedo);
+
+	color += 0.3f * albedo;
+
+	color /= (color + glm::vec3(1.0));
+	return glm::vec4(color * 255.0f, 255);   //if the value not in 0-255 this will overflow and make some mistake
 }
 
 glm::vec4 ShadowMapShader::FS(const V2f& v)
@@ -28,7 +34,12 @@ glm::vec4 ShadowMapShader::FS(const V2f& v)
 	glm::vec3 color = glm::vec3(0.0);
 	glm::vec3 worldPos = glm::vec3(v.posW.x, v.posW.y, v.posW.z);
 	glm::vec3 viewDir = glm::normalize(cam->Position - worldPos);
-	color += dirLight->BlinPhong(v.normal, viewDir, glm::vec3(1.0));
+
+	glm::vec3 albedo = material != nullptr ? material->albedo : glm::vec3(1.0);
+
+	color += dirLight->BlinPhong(v.normal, viewDir, albedo);
+
+	color += 0.3f * albedo;
 
 	glm::vec4 lightPos = (dirLight->lightProj) * (dirLight->lightView) * v.posW;
 	lightPos /= lightPos.w;
@@ -46,19 +57,19 @@ glm::vec4 ShadowMapShader::FS(const V2f& v)
 	//pcf
 	//float shadowCount = 0;
 	//float total = 0.0;
-	//for (int i = -4; i <= 4; i++) {
-	//	for (int j = -4; j <= 4; j++) {
+	//for (int i = -1; i <= 1; i++) {
+	//	for (int j = -1; j <= 1; j++) {
 	//		int newX = x + i;
 	//		int newY = y + j;
 	//		if (newX >= 0 && newX < shadowMapWidth && newY >= 0 && newY < shadowMapHeight) {
 	//			++total;
-	//			if (lightPos.z-0.0005f > shadowBuffer->getDepth(newX, newY))
+	//			if (lightPos.z-0.001f > shadowBuffer->getDepth(newX, newY))
 	//				++shadowCount;
 	//		}
 	//	}
 	//}
-	//float shadow = 1.0f- shadowCount / total,0.0f;
-	//color *= shadow;
+	//float shadow = 1.0f- shadowCount / total;
+	color *= shadow;
 	color /= (color + glm::vec3(1.0));
 	return glm::vec4(color*255.0f, 255);   //if the value not in 0-255 this will overflow and make some mistake
 }

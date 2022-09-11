@@ -28,6 +28,9 @@ extern const int shadowMapHeight;
 
 extern DirectionLight* dirLight;
 
+extern std::shared_ptr<Material> boxMat;
+extern std::shared_ptr<Material> planeMat;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -123,9 +126,9 @@ void Window::run()
 {
     Mesh box = Geometry::CreateBox(glm::vec3(0, 0.5, 0), 0.5);
     Mesh plane = Geometry::CreatePlane(glm::vec3(-4, 0, -4), glm::vec3(-4, 0, 4), glm::vec3(4, 0, 4), glm::vec3(4, 0, -4), glm::vec3(0, 1, 0));
-    box.addMesh(plane);
-
-    
+    Mesh scence;
+    scence.addMesh(box);
+    scence.addMesh(plane);
 
     while (!glfwWindowShouldClose(m_pwindow))
     {
@@ -144,19 +147,22 @@ void Window::run()
         re.shader->setProj(dirLight->lightProj);
         re.update(shadowMapWidth, shadowMapHeight);
         re.buffer->resize(shadowMapWidth, shadowMapHeight);
-        render(box);
+        render(scence);
         
         //color pass
-        re.shader = shadowMapShader;                                //bind shader
         re.buffer = framebuffer;                           //bind render target
-        //re.shader->setView(dirLight->lightView);
-        //re.shader->setProj(dirLight->lightProj);
         re.shader->setProj(cam->PerspectiveMatrix());       
         re.shader->setView(cam->ViewMatrix());
         re.update(m_width, m_height);                      //update viewport  
         re.buffer->resize(m_width,m_height);               //clear frame buffer binded
-        render(box);                                       //render                                    
-        
+        re.shader->setMatrial(boxMat);
+        render(box);                                       //render  
+
+        re.shader = shadowMapShader;
+        re.shader->setProj(cam->PerspectiveMatrix());
+        re.shader->setView(cam->ViewMatrix());
+        re.shader->setMatrial(planeMat);
+        render(plane);
 
         glDrawPixels(m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, re.buffer->m_colorBuffer.data());
         glFlush();
@@ -185,14 +191,14 @@ void Window::showFPS()
     if (delta >= 1.0) {
 
         std::stringstream ss;
-        ss << "Soft Rasterization" << " " << " [" << fps << " FPS]  " << m_width << "x" << m_height<<" ";
+        ss << "honkaiTest" << " " << " [" << fps << " FPS]  " << m_width << "x" << m_height<<" ";
         if (drawHalfSpace) {
             ss << "--half space mode";
         }
         else {
             ss << "--scan line mode";
         }
-        ss << "   --" << "press T to change Rasterization mode";
+        ss << "--" << "press T to change Rasterization mode";
         glfwSetWindowTitle(m_pwindow, ss.str().c_str());
         lastTime = currentTime;
         fps = 0;

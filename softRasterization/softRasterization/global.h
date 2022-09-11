@@ -5,6 +5,7 @@
 #include"Shader.h"
 #include"FrameBuffer.h"
 #include"glm/glm.hpp"
+#include"Material.h"
 
 extern Camera* cam;
 
@@ -29,3 +30,8 @@ extern int screenHeight;
 extern const int shadowMapWidth;
 
 extern const int shadowMapHeight;
+
+
+extern std::shared_ptr<Material> boxMat;
+extern std::shared_ptr<Material> planeMat;
+

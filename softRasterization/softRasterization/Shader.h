@@ -4,6 +4,8 @@
 #include"Triangle.h"
 #include"Light.h"
 #include"Camera.h"
+#include"Material.h"
+#include<memory>
 
 
 struct V2f {
@@ -60,15 +62,18 @@ public:
 	void setModel(const glm::mat4& m) { model = m; }
 	void setView(const glm::mat4& v) { view = v; }
 	void setProj(const glm::mat4& p) { proj = p; }
+	void setMatrial(std::shared_ptr<Material>& mat) { material = mat; }
 
 protected:
 	glm::mat4 model;
 	glm::mat4 view;
 	glm::mat4 proj;
+	std::shared_ptr<Material> material;
 };
 
 class ShadowMapShader:public Shader{
 public:
 	ShadowMapShader() = default;
+	
 	virtual glm::vec4 FS(const V2f& v)override;
 };
