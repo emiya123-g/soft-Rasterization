@@ -5,8 +5,6 @@
 #include"Light.h"
 #include"Camera.h"
 
-extern Camera* cam;
-extern DirectionLight* dirLight;
 
 struct V2f {
 	V2f() = default;
@@ -48,7 +46,7 @@ class Shader {
 public:
 	Shader() = default;
 	Shader(const glm::mat4& m, const glm::mat4& v, const glm::mat4& p) :model(m), view(v), proj(p) {}
-	V2f VS(const Vertex& a2v) {
+	virtual V2f VS(const Vertex& a2v) {
 		V2f o;
 		o.posW = model * a2v.position;
 		o.posH = proj * view * o.posW;
@@ -58,20 +56,19 @@ public:
 		return o;
 	}
 
-	glm::vec4 FS(const V2f& v) {
-		glm::vec3 color = glm::vec3(0.0);
-		glm::vec3 worldPos = glm::vec3(v.posW.x, v.posW.y, v.posW.z);
-		glm::vec3 viewDir = glm::normalize(cam->Position - worldPos);
-		color += dirLight->BlinPhong(v.normal, viewDir,glm::vec3(255));
-		
-		return glm::vec4(color,255);   //if the value not in 0-255 this will overflow and make some mistake
-	}
+	virtual glm::vec4 FS(const V2f& v);
 	void setModel(const glm::mat4& m) { model = m; }
 	void setView(const glm::mat4& v) { view = v; }
 	void setProj(const glm::mat4& p) { proj = p; }
 
-private:
+protected:
 	glm::mat4 model;
 	glm::mat4 view;
 	glm::mat4 proj;
+};
+
+class ShadowMapShader:public Shader{
+public:
+	ShadowMapShader() = default;
+	virtual glm::vec4 FS(const V2f& v)override;
 };

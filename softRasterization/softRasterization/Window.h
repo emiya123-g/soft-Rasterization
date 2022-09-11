@@ -20,8 +20,6 @@ public:
 	void render(Mesh& m);
 	void showFPS();
 
-	
-
 private:
 	int m_width;
 	int m_height;

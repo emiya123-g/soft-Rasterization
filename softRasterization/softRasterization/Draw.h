@@ -66,115 +66,20 @@ private:
 
 class RasterEngine {
 public:
-	RasterEngine(int w, int h) :m_width(w),m_height(h) {
-		viewPort = GeometryStage::getViewPortMatrix(0, 0, m_width, m_height);
-	}
+	RasterEngine(int w, int h) :m_width(w),m_height(h) {}
 	
-	void drawTriangleScanLine(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
-
-		V2f o1 = shader->VS(v1);
-		V2f o2 = shader->VS(v2);
-		V2f o3 = shader->VS(v3);
-
-		GeometryStage::toNDC(o1.posH);
-		GeometryStage::toNDC(o2.posH);
-		GeometryStage::toNDC(o3.posH);
-
-		o1.posH = viewPort * o1.posH;
-		o2.posH = viewPort * o2.posH;
-		o3.posH = viewPort * o3.posH;
-
-		Scanline::scanLineTriangle(o1, o2, o3, *buffer, *shader);
-	}
+	void drawTriangleScanLine(const Vertex& v1, const Vertex& v2, const Vertex& v3);
 	
-	void drawMeshScanLine(const Mesh& mesh) {
-		if (mesh.indexBuffer.empty())
-			return;
-		for (int i = 0; i < mesh.indexBuffer.size(); i += 3) {
-			Vertex v1 = mesh.vertexBuffer[mesh.indexBuffer[i]];
-			Vertex v2 = mesh.vertexBuffer[mesh.indexBuffer[i+1]];
-			Vertex v3 = mesh.vertexBuffer[mesh.indexBuffer[i+2]];
-
-			V2f o1 = shader->VS(v1);
-			V2f o2 = shader->VS(v2);
-			V2f o3 = shader->VS(v3);
-		
-			std::vector<V2f> clipingVertexs = CVVclip::sutherlandHodgeman(o1, o2, o3);
-
-			for (int j = 0; j < clipingVertexs.size(); ++j) {
-				CVVclip::perspectiveDivision(clipingVertexs[j]);
-			}
-			int n = clipingVertexs.size() - 3 + 1;
-			for (int j = 0; j < n; j++) {
-				o1 = clipingVertexs[0];
-				o2 = clipingVertexs[j + 1];
-				o3 = clipingVertexs[j + 2];
-
-     			o1.posH = viewPort * o1.posH;
-				o2.posH = viewPort * o2.posH;
-				o3.posH = viewPort * o3.posH;
-
-				if (GeometryStage::FaceCulling(o1.posH, o2.posH, o3.posH)) {
-					continue;
-				}
-
-				Scanline::scanLineTriangle(o1, o2, o3, *buffer, *shader);
-			}
-		}
-
-	}
+	void drawMeshScanLine(const Mesh& mesh);
 	
-	void drawMeshHalfSpace(const Mesh& mesh) {
-		if (mesh.indexBuffer.empty())
-			return;
-		for (int i = 0; i < mesh.indexBuffer.size(); i += 3) {
-			Vertex v1 = mesh.vertexBuffer[mesh.indexBuffer[i]];
-			Vertex v2 = mesh.vertexBuffer[mesh.indexBuffer[i + 1]];
-			Vertex v3 = mesh.vertexBuffer[mesh.indexBuffer[i + 2]];
-
-			V2f o1 = shader->VS(v1);
-			V2f o2 = shader->VS(v2);
-			V2f o3 = shader->VS(v3);
-
-			
-
-			std::vector<V2f> clipingVertexs = CVVclip::sutherlandHodgeman(o1, o2, o3);
-
-			for (int j = 0; j < clipingVertexs.size(); ++j) {
-				CVVclip::perspectiveDivision(clipingVertexs[j]);
-			}
-			int n = clipingVertexs.size() - 3 + 1;
-			for (int j = 0; j < n; j++) {
-				o1 = clipingVertexs[0];
-				o2 = clipingVertexs[j + 1];
-				o3 = clipingVertexs[j + 2];
-
-				o1.posH = viewPort * o1.posH;
-				o2.posH = viewPort * o2.posH;
-				o3.posH = viewPort * o3.posH;
-
-				if (GeometryStage::FaceCulling(o1.posH, o2.posH, o3.posH)) {
-					continue;
-				}
-
-				halfSpace::halfSpaceTriangle(o1, o2, o3, *buffer, *shader);
-			}
-		}
-	}
+	void drawMeshHalfSpace(const Mesh& mesh);
 	
-	void update(int w, int h) {
-		if (w == m_width && h == m_height)
-			return;
-		m_width = w;
-		m_height = h;
-		viewPort = GeometryStage::getViewPortMatrix(0, 0, m_width, m_height);
-	}
+	void update(int w, int h);
 
 public:
 	std::shared_ptr<FrameBuffer> buffer;
 	std::shared_ptr<Shader> shader;
 	int m_width;
 	int m_height;
-	glm::mat4 viewPort;
 };
 

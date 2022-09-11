@@ -7,7 +7,7 @@ public:
 		m_colorBuffer(deepBuffer?0:w*h*4,0),m_depthBuffer(w*h,1.0f),depthOnly(deepBuffer) {
 		
 	}
-	void resize(int w, int h) {
+	void resize(const int &w, const int &h) {
 		m_width = w;
 		m_height = h;
 		if(!depthOnly)

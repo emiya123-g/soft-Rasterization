@@ -1,6 +1,7 @@
 #include"window.h"
 #include<sstream>
 #include<windows.h>
+#include<iostream>
 #include"Geometry.h"
 #include"Transform.h"
 
@@ -12,9 +13,20 @@ extern DirectionLight* dirLight;
 
 extern std::shared_ptr<Shader> shader;
 
+extern std::shared_ptr<ShadowMapShader> shadowMapShader;
+
 extern std::shared_ptr<FrameBuffer> framebuffer;
 
 extern std::shared_ptr<FrameBuffer> shadowBuffer;
+
+extern int screenWidth;
+extern int screenHeight;
+
+extern const int shadowMapWidth;
+
+extern const int shadowMapHeight;
+
+extern DirectionLight* dirLight;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -57,6 +69,26 @@ void processInput(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
         drawHalfSpace = !drawHalfSpace;
+    }
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+        dirLight->Pos.z -= 0.1f;
+        dirLight->Pos.z = max(dirLight->Pos.z, -8.0f);
+        dirLight->update();
+    }
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+        dirLight->Pos.z += 0.1f;
+        dirLight->Pos.z = min(dirLight->Pos.z, 8.0f);
+        dirLight->update();
+    }
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+        dirLight->Pos.x -= 0.1f;
+        dirLight->Pos.x = max(dirLight->Pos.x, -8.0f);
+        dirLight->update();
+    }
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+        dirLight->Pos.x += 0.1f;
+        dirLight->Pos.x = min(dirLight->Pos.x, 8.0f);
+        dirLight->update();
     }
 }
 
@@ -102,21 +134,23 @@ void Window::run()
         showFPS();
         glfwGetWindowSize(m_pwindow, &m_width, &m_height);
         cam->UpdateAspect(m_width, m_height);
+        screenWidth = m_width;
+        screenHeight =  m_height;
 
         //shadow pass
-        //re.shader = shader;
-        //re.buffer = shadowBuffer;
-        //re.shader->setView(dirLight->lightView);
-        //re.shader->setProj(dirLight->lightProj);
-        //re.update(m_width, m_height);
-        //re.buffer->resize(m_width, m_height);
-        //render(box);
-        
-        //color pass
-        re.shader = shader;                                //bind shader
-        re.buffer = framebuffer;                           //bind render target
+        re.shader = shader;
+        re.buffer = shadowBuffer;
         re.shader->setView(dirLight->lightView);
         re.shader->setProj(dirLight->lightProj);
+        re.update(shadowMapWidth, shadowMapHeight);
+        re.buffer->resize(shadowMapWidth, shadowMapHeight);
+        render(box);
+        
+        //color pass
+        re.shader = shadowMapShader;                                //bind shader
+        re.buffer = framebuffer;                           //bind render target
+        //re.shader->setView(dirLight->lightView);
+        //re.shader->setProj(dirLight->lightProj);
         re.shader->setProj(cam->PerspectiveMatrix());       
         re.shader->setView(cam->ViewMatrix());
         re.update(m_width, m_height);                      //update viewport  
