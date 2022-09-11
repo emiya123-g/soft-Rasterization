@@ -22,10 +22,10 @@ public:
 
 class DirectionLight :public Light {
 public:
-	DirectionLight(const glm::vec3& pos = glm::vec3(0, 2, 1), const glm::vec3& color = glm::vec3(255), const glm::vec3& dir = glm::vec3(0, 2, 1), const float& intensity = 1.0f) :
+	DirectionLight(const glm::vec3& pos = glm::vec3(3, 5, 10), const glm::vec3& color = glm::vec3(255), const glm::vec3& dir = glm::vec3(3, 5, 10), const float& intensity = 1.0f) :
 		Light(pos, color, dir, intensity) {
 		lightView = glm::lookAt(pos, glm::vec3(0.0f), glm::vec3(0, 1, 0));
-		lightProj = glm::ortho(-50, 50, -50, 50);
+		lightProj = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f,0.3f,50.0f);
 	}
 	glm::vec3 BlinPhong(const glm::vec3 &normal,const glm::vec3 &viewDir,const glm::vec3 &albedo) {
 		float diff = std::max(glm::dot(glm::normalize(normal), Dir),0.0f);
@@ -34,7 +34,7 @@ public:
 		float spec = pow(std::max(glm::dot(normal, halfVec), 0.0f), 5);
 		return (spec * Color + diff * albedo) * Intensity;
 	}
-private:
+public:
 	glm::mat4 lightView;
 	glm::mat4 lightProj;
 };

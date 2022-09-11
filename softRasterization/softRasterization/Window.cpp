@@ -8,6 +8,14 @@ extern Camera* cam;
 
 extern bool drawHalfSpace;
 
+extern DirectionLight* dirLight;
+
+extern std::shared_ptr<Shader> shader;
+
+extern std::shared_ptr<FrameBuffer> framebuffer;
+
+extern std::shared_ptr<FrameBuffer> shadowBuffer;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -96,12 +104,19 @@ void Window::run()
         cam->UpdateAspect(m_width, m_height);
 
         //shadow pass
+        //re.shader = shader;
+        //re.buffer = shadowBuffer;
+        //re.shader->setView(dirLight->lightView);
+        //re.shader->setProj(dirLight->lightProj);
+        //re.update(m_width, m_height);
+        //re.buffer->resize(m_width, m_height);
+        //render(box);
         
-
-
         //color pass
         re.shader = shader;                                //bind shader
         re.buffer = framebuffer;                           //bind render target
+        re.shader->setView(dirLight->lightView);
+        re.shader->setProj(dirLight->lightProj);
         re.shader->setProj(cam->PerspectiveMatrix());       
         re.shader->setView(cam->ViewMatrix());
         re.update(m_width, m_height);                      //update viewport  
