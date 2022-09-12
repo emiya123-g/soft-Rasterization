@@ -159,7 +159,7 @@ void Window::run()
         re.shader->setProj(dirLight->lightProj);
         re.update(shadowMapWidth, shadowMapHeight);
         re.buffer->resize(shadowMapWidth, shadowMapHeight);
-        render(scence);
+        render(box);
         
         //color pass
         re.buffer = framebuffer;                           //bind render target
@@ -209,7 +209,7 @@ void Window::showFPS()
         }
         ss << "-" << "'T' to change mode";
         ss << " [" << fps << " FPS] " << m_width << "x" << m_height<<" "<<"roughness:"<<boxMat->roughness
-            <<" metalness"<<boxMat->metalness;
+            <<" metalness:"<<boxMat->metalness;
         
         glfwSetWindowTitle(m_pwindow, ss.str().c_str());
         lastTime = currentTime;

@@ -70,26 +70,27 @@ glm::vec4 ShadowMapShader::FS(const V2f& v)
 	int x = lightPos.x;
 	int y = lightPos.y;
 	//shadow map
-	float shadow = lightPos.z-0.002f > shadowBuffer->getDepth(x, y) ? 0.0f : 1.0f;
-	color *= shadow;
-
-	color += 0.2f * albedo;
-	//pcf
-	//float shadowCount = 0;
-	//float total = 0.0;
-	//for (int i = -1; i <= 1; i++) {
-	//	for (int j = -1; j <= 1; j++) {
-	//		int newX = x + i;
-	//		int newY = y + j;
-	//		if (newX >= 0 && newX < shadowMapWidth && newY >= 0 && newY < shadowMapHeight) {
-	//			++total;
-	//			if (lightPos.z-0.001f > shadowBuffer->getDepth(newX, newY))
-	//				++shadowCount;
-	//		}
-	//	}
-	//}
-	//float shadow = 1.0f- shadowCount / total;
+	//float shadow = lightPos.z-0.001f > shadowBuffer->getDepth(x, y) ? 0.0f : 1.0f;
 	//color *= shadow;
+
+	
+	//pcf
+	float shadowCount = 0;
+	float total = 0.0;
+	for (int i = -1; i <= 1; i++) {
+		for (int j = -1; j <= 1; j++) {
+			int newX = x + i;
+			int newY = y + j;
+			if (newX >= 0 && newX < shadowMapWidth && newY >= 0 && newY < shadowMapHeight) {
+				++total;
+				if (lightPos.z > shadowBuffer->getDepth(newX, newY))
+					++shadowCount;
+			}
+		}
+	}
+	float shadow = 1.0f- shadowCount / total;
+	color *= shadow;
+	color += 0.1f * albedo;
 	color /= (color + glm::vec3(1.0));
 	return glm::vec4(color*255.0f, 255);   //if the value not in 0-255 this will overflow and make some mistake
 }
