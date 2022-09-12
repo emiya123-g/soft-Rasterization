@@ -19,11 +19,21 @@ glm::vec4 Shader::FS(const V2f& v)
 	glm::vec3 worldPos = glm::vec3(v.posW.x, v.posW.y, v.posW.z);
 	glm::vec3 viewDir = glm::normalize(cam->Position - worldPos);
 
-	glm::vec3 albedo = material != nullptr ? material->albedo : glm::vec3(1.0);
+	glm::vec3 albedo = glm::vec3(1.0);
 
-	color += dirLight->BlinPhong(v.normal, viewDir, albedo);
+	if (material != nullptr) {
+		if (material->texture.data != nullptr) {
+			albedo = material->texture.Sample2D(v.texcoord);
+		}
+		else
+			albedo = material->albedo;
+	}
+	if (material != nullptr)
+		color += material->cookTorrance(v.normal, viewDir, dirLight->Dir, albedo);
+	else
+		color += dirLight->BlinPhong(v.normal, viewDir, albedo);
 
-	color += 0.3f * albedo;
+	color += 0.2f * albedo;
 
 	color /= (color + glm::vec3(1.0));
 	return glm::vec4(color * 255.0f, 255);   //if the value not in 0-255 this will overflow and make some mistake
@@ -35,11 +45,21 @@ glm::vec4 ShadowMapShader::FS(const V2f& v)
 	glm::vec3 worldPos = glm::vec3(v.posW.x, v.posW.y, v.posW.z);
 	glm::vec3 viewDir = glm::normalize(cam->Position - worldPos);
 
-	glm::vec3 albedo = material != nullptr ? material->albedo : glm::vec3(1.0);
+	glm::vec3 albedo = glm::vec3(1.0);
 
+	if (material != nullptr) {
+		if (material->texture.data != nullptr) {
+			albedo = material->texture.Sample2D(v.texcoord);
+		}
+		else
+			albedo = material->albedo;
+	}
+
+	//if (material != nullptr)
+	//	color += material->cookTorrance(v.normal, viewDir, dirLight->Dir, albedo);
+	//else
 	color += dirLight->BlinPhong(v.normal, viewDir, albedo);
 
-	color += 0.3f * albedo;
 
 	glm::vec4 lightPos = (dirLight->lightProj) * (dirLight->lightView) * v.posW;
 	lightPos /= lightPos.w;
@@ -50,10 +70,10 @@ glm::vec4 ShadowMapShader::FS(const V2f& v)
 	int x = lightPos.x;
 	int y = lightPos.y;
 	//shadow map
-	float shadow = lightPos.z-0.001f > shadowBuffer->getDepth(x, y) ? 0.0f : 1.0f;
+	float shadow = lightPos.z-0.002f > shadowBuffer->getDepth(x, y) ? 0.0f : 1.0f;
 	color *= shadow;
 
-
+	color += 0.2f * albedo;
 	//pcf
 	//float shadowCount = 0;
 	//float total = 0.0;
@@ -69,7 +89,7 @@ glm::vec4 ShadowMapShader::FS(const V2f& v)
 	//	}
 	//}
 	//float shadow = 1.0f- shadowCount / total;
-	color *= shadow;
+	//color *= shadow;
 	color /= (color + glm::vec3(1.0));
 	return glm::vec4(color*255.0f, 255);   //if the value not in 0-255 this will overflow and make some mistake
 }

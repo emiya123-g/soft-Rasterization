@@ -93,6 +93,18 @@ void processInput(GLFWwindow* window)
         dirLight->Pos.x = min(dirLight->Pos.x, 8.0f);
         dirLight->update();
     }
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+        boxMat->addRoughness(-0.01f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
+        boxMat->addRoughness(0.01f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+        boxMat->addMetalness(-0.01f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+        boxMat->addMetalness(0.01f);
+    }
 }
 
 int Window::init()
@@ -180,7 +192,6 @@ void Window::render(Mesh &m)
         re.drawMeshScanLine(m);
 }
 
-
 void Window::showFPS()
 {
     ++fps;
@@ -189,16 +200,17 @@ void Window::showFPS()
     double delta = currentTime - lastTime;
     
     if (delta >= 1.0) {
-
         std::stringstream ss;
-        ss << "honkaiTest" << " " << " [" << fps << " FPS]  " << m_width << "x" << m_height<<" ";
         if (drawHalfSpace) {
-            ss << "--half space mode";
+            ss << "half space";
         }
         else {
-            ss << "--scan line mode";
+            ss << "scan line";
         }
-        ss << "--" << "press T to change Rasterization mode";
+        ss << "-" << "'T' to change mode";
+        ss << " [" << fps << " FPS] " << m_width << "x" << m_height<<" "<<"roughness:"<<boxMat->roughness
+            <<" metalness"<<boxMat->metalness;
+        
         glfwSetWindowTitle(m_pwindow, ss.str().c_str());
         lastTime = currentTime;
         fps = 0;

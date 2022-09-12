@@ -4,7 +4,7 @@
 
 int main()
 {
-    Window window(600, 400);
+    Window window(800, 600);
     window.init();
     window.run();
     return 0;

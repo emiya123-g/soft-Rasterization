@@ -63,6 +63,7 @@ public:
 	void setView(const glm::mat4& v) { view = v; }
 	void setProj(const glm::mat4& p) { proj = p; }
 	void setMatrial(std::shared_ptr<Material>& mat) { material = mat; }
+	
 
 protected:
 	glm::mat4 model;

@@ -28,5 +28,5 @@ glm::mat4 viewPort = glm::mat4(
 	screenWidth/2, screenHeight/2,0,1
 );
 
-std::shared_ptr<Material> boxMat = std::make_shared<Material>(glm::vec3(1.0, 0.0, 0.0));
-std::shared_ptr<Material> planeMat = std::make_shared<Material>(glm::vec3(0.0, 1.0, 0.0));
+std::shared_ptr<Material> boxMat = std::make_shared<Material>("container.png");
+std::shared_ptr<Material> planeMat = std::make_shared<Material>("KIA.png");
